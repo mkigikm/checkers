@@ -8,7 +8,7 @@ module Checkers
 
     def initialize
       @turn = :red
-      @board = Checkers::Board.read_board('test_board')
+      @board = Checkers::Board.starting_board
       @turn_counter = 0
     end
 

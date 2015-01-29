@@ -17,7 +17,7 @@ module Checkers
           col *= 2
           black_pos = [row, col + ((row + 1) % 2)]
           red_pos = [ROWS - 1 - row, col + (row % 2)]
-          Piece.new(board, black_pos, :black, :king)
+          Piece.new(board, black_pos, :black)
           Piece.new(board, red_pos,   :red)
         end
       end
