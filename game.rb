@@ -24,8 +24,6 @@ module Checkers
 
       board.user_moves(start, *moves)
       switch_turn
-
-      p board
     end
 
     private

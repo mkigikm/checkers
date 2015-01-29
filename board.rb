@@ -139,6 +139,33 @@ module Checkers
       board_str
     end
 
+    def render_scrolling
+      board_str = ""
+      bg_colors = [:white, :black]
+      bg_counter = 1
+
+      ROWS.times do |row|
+        bg_counter = (bg_counter + 1) % 2
+
+        COLS.times do |col|
+          bg_counter = (bg_counter + 1) % 2
+
+          piece = self[[row, col]]
+          if piece.nil?
+            cur_str = "   "
+          else
+            cur_str = " #{piece.render_scrolling} "
+          end
+
+          board_str << cur_str.colorize(:background => bg_colors[bg_counter])
+        end
+
+        board_str << "\n"
+      end
+
+      board_str
+    end
+
     def all_pieces
       @grid.flatten.compact
     end

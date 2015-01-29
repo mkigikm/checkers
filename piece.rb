@@ -1,5 +1,8 @@
+# encoding utf-8
+
 require_relative 'errors.rb'
 require 'byebug'
+require 'colorize'
 
 module Checkers
   class Piece
@@ -73,6 +76,11 @@ module Checkers
       else
         char
       end
+    end
+
+    def render_scrolling
+      char = rank == :king ? "⓿" : "⦿"
+      char.colorize(color)
     end
 
     protected
