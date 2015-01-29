@@ -19,6 +19,11 @@ module Checkers
       end
     end
 
+    def game_over
+      puts @game.board.render_scrolling
+      puts "#{@game.turn.to_s.capitalize} lost"
+    end
+
     def parse_move_input(move_input)
       moves = move_input.split(",").map do |square|
         square.to_i

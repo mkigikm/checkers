@@ -133,6 +133,8 @@ module Checkers
 
     def valid_move_seq?(start, moves)
       return false if self[start].nil?
+      color = self[start].color
+      return valid_moves(color).include?([start, moves])
       duped_board = dup
 
       begin
@@ -245,7 +247,7 @@ module Checkers
       if valid_moves.empty?
         turn_pieces.each do |piece|
           piece.valid_slides.each do |slide_square|
-            valid_moves << [piece.square, slide_square]
+            valid_moves << [piece.square, [slide_square]]
           end
         end
       end
@@ -254,8 +256,7 @@ module Checkers
     end
 
     def game_over?(turn)
-
-      turn_pieces.any?
+      valid_moves(turn).empty?
     end
 
     private

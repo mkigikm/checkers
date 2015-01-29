@@ -8,7 +8,7 @@ module Checkers
 
     def initialize
       @turn = :red
-      @board = Checkers::Board.starting_board
+      @board = Checkers::Board.read_board('test_board')
       @turn_counter = 0
     end
 
@@ -28,7 +28,7 @@ module Checkers
     end
 
     def over?
-      return false
+      return @board.game_over?(@turn)
     end
 
     private
@@ -46,4 +46,6 @@ if __FILE__ == $PROGRAM_NAME
   until game.over?
     human_interface.get_move
   end
+
+  human_interface.game_over
 end
