@@ -7,7 +7,7 @@ module Checkers
     STARTING_PIECES = 12
     STARTING_ROWS = 3
 
-    def self.standard_board
+    def self.starting_board
       board = Board.new
 
       STARTING_ROWS.times do |row|
@@ -43,13 +43,10 @@ module Checkers
     def connections(pos, dir)
       row, col = pos
       new_row = row + dir_offset(dir)
-      connected = []
 
-      return connected unless new_row.between?(0, ROWS - 1)
-      connected << [new_row, col - 1] if col > 0
-      connected << [new_row, col + 1] if col < COLS
-
-      connected
+      [[new_row, col - 1], [new_row, col + 1]].select do |(row, col)|
+        row.between?(0, ROWS - 1) && col.between?(0, COLS - 1)
+      end
     end
 
     def [](pos)
@@ -70,17 +67,8 @@ module Checkers
       @grid[row][col].nil?
     end
 
-    def color_at?(pos, color)
-      piece = self[pos]
-      !piece.nil? && piece.color == color
-    end
-
-    def king_row(pos, color)
-      if color == :red
-        pos[0] == 0
-      else
-        pos[0] == ROWS - 1
-      end
+    def king_row(color)
+      color == :red ? 0 : ROWS - 1
     end
 
     def user_move(square1, square2)

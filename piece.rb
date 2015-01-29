@@ -31,7 +31,7 @@ module Checkers
       directions.each do |dir|
         @board.connections(@pos, dir).each do |capture_pos|
           if @board.connected?(capture_pos, land_pos, dir) &&
-              @board.empty?(land_pos) && @board.color_at?(capture_pos, capture_color)
+              @board.empty?(land_pos) && can_capture?(capture_pos)
             @board[@pos] = nil
             @board[capture_pos] = nil
             @board[land_pos] = self
@@ -46,10 +46,12 @@ module Checkers
     end
 
     def check_promote
-      if rank == :pawn && @board.king_row(@pos, color)
+      if rank == :pawn && @board.king_row(color) == @pos[0]
         @rank = :king
       end
     end
+
+    def
 
     def render
       char = color == :red ? 'r' : 'b'
@@ -61,6 +63,11 @@ module Checkers
     end
 
     private
+    def can_capture?(capture_pos)
+      capture_piece = @board[capture_pos]
+      !capture_piece.nil? && capture_piece.color != color
+    end
+
     def directions
       if @rank == :king
         [:up, :down]
