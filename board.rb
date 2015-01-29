@@ -35,13 +35,6 @@ module Checkers
       @grid = Array.new(ROWS) { Array.new(COLS) }
     end
 
-    def connected?(pos1, pos2, dir)
-      row1, col1 = pos1
-      row2, col2 = pos2
-
-      (col1 - 1 == col2 || col1 + 1 == col2) && row1 + dir_offset(dir) == row2
-    end
-
     def connections(pos, dir)
       row, col = pos
       new_row = row + dir_offset(dir)
@@ -49,6 +42,36 @@ module Checkers
       [[new_row, col - 1], [new_row, col + 1]].select do |(row, col)|
         row.between?(0, ROWS - 1) && col.between?(0, COLS - 1)
       end
+    end
+
+    def connection(start_square, end_square)
+      row_diff = end_square[0] - start_square[0]
+      col_diff = end_square[1] - start_square[1]
+
+      if row_diff.abs != 1 || col_diff.abs != 1
+        nil
+      elsif row_diff == 1
+        :down
+      else
+        :up
+      end
+    end
+
+    def jump_connection(start_square, land_square)
+      start_row, start_col = start_square
+      row_diff = land_square[0] - start_row
+      col_diff = land_square[1] - start_col
+
+      if row_diff.abs != 2 || col_diff.abs != 2
+        nil
+      else
+        [start_row + row_diff / 2, start_col + col_diff / 2]
+      end
+    end
+
+    def in_king_row?(piece)
+      king_row = piece.color == :red ? 0 : ROWS - 1
+      piece.square[0] == king_row
     end
 
     def [](pos)
@@ -69,13 +92,9 @@ module Checkers
       @grid[row][col].nil?
     end
 
-    def king_row(color)
-      color == :red ? 0 : ROWS - 1
-    end
-
     def valid_move_seq?(start, moves)
+      return false if self[start].nil?
       duped_board = dup
-      #debugger
 
       begin
         duped_board[start].perform_moves!(moves)
@@ -94,21 +113,6 @@ module Checkers
       end
 
       self
-    end
-
-    def user_move(square1, square2)
-      pos1 = self.class.translate_square(square1)
-      pos2 = self.class.translate_square(square2)
-      p pos1
-      p pos2
-      piece = self[pos1]
-
-      if !piece.perform_slide(pos2)
-        piece.perform_jump(pos2)
-      end
-
-      puts inspect
-      nil
     end
 
     def user_moves(start, *moves)

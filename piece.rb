@@ -1,51 +1,47 @@
 require_relative 'errors.rb'
+require 'byebug'
 
 module Checkers
   class Piece
-    attr_reader :color, :rank
+    attr_reader :color, :rank, :square
 
-    def initialize(board, pos, color, rank=:pawn)
+    def initialize(board, square, color, rank=:pawn)
       @board = board
-      @pos = pos
+      @square = square
       @color = color
       @rank = rank
 
-      board[pos] = self
+      board[square] = self
     end
 
     def my_dup(dup_board)
-      Piece.new(dup_board, @pos.dup, color, rank)
+      Piece.new(dup_board, square.dup, color, rank)
     end
 
-    def perform_slide(new_pos)
-      directions.each do |dir|
-        if board.connected?(@pos, new_pos, dir) && board.empty?(new_pos)
-          board[@pos] = nil
-          board[new_pos] = self
-          @pos = new_pos
-          check_promote
-          return true
-        end
+    def perform_slide(new_square)
+      if can_move_in?(board.connection(square, new_square)) &&
+          board.empty?(new_square)
+        board[square] = nil
+          board[new_square] = self
+        @square = new_square
+        check_promote
+        return true
       end
 
       false
     end
 
-    def perform_jump(land_pos)
-      capture_color = color == :red ? :black : :red
+    def perform_jump(land_square)
+      jump_square = @board.jump_connection(square, land_square)
 
-      directions.each do |dir|
-        board.connections(@pos, dir).each do |capture_pos|
-          if board.connected?(capture_pos, land_pos, dir) &&
-              board.empty?(land_pos) && enemy_piece?(capture_pos)
-            board[@pos] = nil
-            board[capture_pos] = nil
-            board[land_pos] = self
-            @pos = land_pos
-            check_promote
-            return true
-          end
-        end
+      if jump_square && can_move_in?(board.connection(square, jump_square)) &&
+          board.empty?(land_square) && enemy_piece?(jump_square)
+        board[square] = nil
+        board[jump_square] = nil
+        board[land_square] = self
+        @square = land_square
+        check_promote
+        return true
       end
 
       false
@@ -57,13 +53,13 @@ module Checkers
       end
 
       old_rank = rank
-      move_sequence.each do |land_pos|
+      move_sequence.each do |land_square|
         if rank != old_rank
           raise InvalidMoveError.new("pieces can't jump after promotion")
         end
 
-        unless perform_jump(land_pos)
-          raise InvalidMoveError.new("piece at #{@pos} can't land at #{land_pos}")
+        unless perform_jump(land_square)
+          raise InvalidMoveError.new("piece at #{@square} can't land at #{land_square}")
         end
       end
 
@@ -72,7 +68,7 @@ module Checkers
 
     def render
       char = color == :red ? 'r' : 'b'
-      if @rank == :king
+      if rank == :king
         char.upcase
       else
         char
@@ -83,23 +79,19 @@ module Checkers
     attr_accessor :board
 
     private
-    def enemy_piece?(capture_pos)
-      capture_piece = @board[capture_pos]
+    def enemy_piece?(capture_square)
+      capture_piece = @board[capture_square]
       !capture_piece.nil? && capture_piece.color != color
     end
 
-    def directions
-      if @rank == :king
-        [:up, :down]
-      elsif color == :red
-        [:up]
-      else
-        [:down]
-      end
+    def can_move_in?(direction)
+      !direction.nil? && (rank == :king ||
+                          (color == :red && direction == :up) ||
+                          (color == :black && direction == :down))
     end
 
     def check_promote
-      if rank == :pawn && board.king_row(color) == @pos[0]
+      if rank == :pawn && board.in_king_row?(self)
         @rank = :king
       end
     end
