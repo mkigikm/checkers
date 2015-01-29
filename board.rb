@@ -1,4 +1,6 @@
 require_relative 'piece.rb'
+require_relative 'errors.rb'
+require 'byebug'
 
 module Checkers
   class Board
@@ -15,8 +17,8 @@ module Checkers
           col *= 2
           black_pos = [row, col + ((row + 1) % 2)]
           red_pos = [ROWS - 1 - row, col + (row % 2)]
-          board[black_pos] = Piece.new(board, black_pos, :black)
-          board[red_pos]   = Piece.new(board, red_pos,   :red)
+          Piece.new(board, black_pos, :black)
+          Piece.new(board, red_pos,   :red)
         end
       end
 
@@ -71,6 +73,29 @@ module Checkers
       color == :red ? 0 : ROWS - 1
     end
 
+    def valid_move_seq?(start, moves)
+      duped_board = dup
+      #debugger
+
+      begin
+        duped_board[start].perform_moves!(moves)
+      rescue InvalidMoveError => e
+        return false
+      end
+
+      true
+    end
+
+    def perform_moves(start, moves)
+      if valid_move_seq?(start, moves)
+        self[start].perform_moves!(moves)
+      else
+        raise InvalidMoveError
+      end
+
+      self
+    end
+
     def user_move(square1, square2)
       pos1 = self.class.translate_square(square1)
       pos2 = self.class.translate_square(square2)
@@ -84,6 +109,11 @@ module Checkers
 
       puts inspect
       nil
+    end
+
+    def user_moves(start, *moves)
+      squares = moves.map { |square| self.class.translate_square(square) }
+      perform_moves(self.class.translate_square(start), squares)
     end
 
     def inspect
@@ -103,6 +133,16 @@ module Checkers
       end
 
       board_str
+    end
+
+    def all_pieces
+      @grid.flatten.compact
+    end
+
+    def dup
+      Board.new.tap do |duped_board|
+        all_pieces.each { |piece| piece.my_dup(duped_board) }
+      end
     end
 
     private
