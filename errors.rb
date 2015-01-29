@@ -1,4 +1,10 @@
 module Checkers
-  class InvalidMoveError < StandardError
+  class CheckersError < StandardError
+  end
+
+  class InvalidMoveError < CheckersError
+  end
+
+  class InvalidInputError < CheckersError
   end
 end

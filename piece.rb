@@ -79,7 +79,7 @@ module Checkers
     end
 
     def render_scrolling
-      char = rank == :king ? "⓿" : "⦿"
+      char = rank == :king ? "⦿" : "○"
       char.colorize(color)
     end
 
