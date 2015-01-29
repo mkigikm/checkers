@@ -143,6 +143,7 @@ module Checkers
       board_str = ""
       bg_colors = [:white, :black]
       bg_counter = 1
+      square_counter = 1
 
       ROWS.times do |row|
         bg_counter = (bg_counter + 1) % 2
@@ -155,6 +156,20 @@ module Checkers
             cur_str = "   "
           else
             cur_str = " #{piece.render_scrolling} "
+          end
+
+          board_str << cur_str.colorize(:background => bg_colors[bg_counter])
+        end
+
+        board_str << "   "
+
+        COLS.times do |col|
+          bg_counter = (bg_counter + 1) % 2
+          if row % 2 == col % 2
+            cur_str = "   "
+          else
+            cur_str = square_counter.to_s.rjust(3)
+            square_counter += 1
           end
 
           board_str << cur_str.colorize(:background => bg_colors[bg_counter])
