@@ -230,6 +230,34 @@ module Checkers
       end
     end
 
+    def valid_moves(turn)
+      turn_pieces = all_pieces.select { |piece| piece.color == turn }
+      valid_moves = []
+
+      turn_pieces.each do |piece|
+        piece.valid_jumps.each do |jump_sequence|
+          unless jump_sequence.empty?
+            valid_moves << [piece.square, jump_sequence]
+          end
+        end
+      end
+
+      if valid_moves.empty?
+        turn_pieces.each do |piece|
+          piece.valid_slides.each do |slide_square|
+            valid_moves << [piece.square, slide_square]
+          end
+        end
+      end
+
+      valid_moves
+    end
+
+    def game_over?(turn)
+
+      turn_pieces.any?
+    end
+
     private
     def dir_offset(dir)
       dir == :up ? -1 : 1
