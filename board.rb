@@ -23,6 +23,12 @@ module Checkers
       board
     end
 
+    def self.translate_square(square)
+      square -= 1
+      offset = square % 8 > 3 ? 0 : 1
+      [square / 4, (square % 4) * 2 + offset]
+    end
+
     def initialize
       @grid = Array.new(ROWS) { Array.new(COLS) }
     end
@@ -66,7 +72,7 @@ module Checkers
 
     def color_at?(pos, color)
       piece = self[pos]
-      piece.nil? && piece.color == color
+      !piece.nil? && piece.color == color
     end
 
     def king_row(pos, color)
@@ -75,6 +81,21 @@ module Checkers
       else
         pos[0] == ROWS - 1
       end
+    end
+
+    def user_move(square1, square2)
+      pos1 = self.class.translate_square(square1)
+      pos2 = self.class.translate_square(square2)
+      p pos1
+      p pos2
+      piece = self[pos1]
+
+      if !piece.perform_slide(pos2)
+        piece.perform_jump(pos2)
+      end
+
+      puts inspect
+      nil
     end
 
     def inspect

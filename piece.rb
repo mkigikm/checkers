@@ -1,3 +1,5 @@
+require 'byebug'
+
 module Checkers
   class Piece
     attr_reader :color, :rank
@@ -29,8 +31,8 @@ module Checkers
       directions.each do |dir|
         @board.connections(@pos, dir).each do |capture_pos|
           if @board.connected?(capture_pos, land_pos, dir) &&
-              @board.empty?(new_pos) && @board.color_at?(capture_pos, capture_color)
-            @board[pos] = nil
+              @board.empty?(land_pos) && @board.color_at?(capture_pos, capture_color)
+            @board[@pos] = nil
             @board[capture_pos] = nil
             @board[land_pos] = self
             @pos = land_pos
@@ -60,7 +62,7 @@ module Checkers
 
     private
     def directions
-      if :king
+      if @rank == :king
         [:up, :down]
       elsif color == :red
         [:up]
