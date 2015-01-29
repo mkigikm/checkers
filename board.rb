@@ -17,8 +17,28 @@ module Checkers
           col *= 2
           black_pos = [row, col + ((row + 1) % 2)]
           red_pos = [ROWS - 1 - row, col + (row % 2)]
-          Piece.new(board, black_pos, :black)
+          Piece.new(board, black_pos, :black, :king)
           Piece.new(board, red_pos,   :red)
+        end
+      end
+
+      board
+    end
+
+    def self.read_board(filename)
+      board = Board.new
+
+      lines = File.readlines(filename)
+      lines.each_with_index do |line, row|
+        COLS.times do |col|
+          square = [row, col]
+
+          case line[col]
+          when 'r' then Piece.new(board, square, :red)
+          when 'R' then Piece.new(board, square, :red, :king)
+          when 'b' then Piece.new(board, square, :black)
+          when 'B' then Piece.new(board, square, :black, :king)
+          end
         end
       end
 
@@ -35,12 +55,31 @@ module Checkers
       @grid = Array.new(ROWS) { Array.new(COLS) }
     end
 
-    def connections(pos, dir)
-      row, col = pos
+    def connections(square, dir)
+      row, col = square
       new_row = row + dir_offset(dir)
 
-      [[new_row, col - 1], [new_row, col + 1]].select do |(row, col)|
-        row.between?(0, ROWS - 1) && col.between?(0, COLS - 1)
+      [[new_row, col - 1], [new_row, col + 1]].select do |square|
+        valid_square?(square)
+      end
+    end
+
+    def valid_square?(square)
+      row, col = square
+      row.between?(0, ROWS - 1) && col.between?(0, COLS - 1)
+    end
+
+    def jump_connections(square, dir)
+      row, col = square
+      jump_row = row + dir_offset(dir)
+      land_row = row + 2 * dir_offset(dir)
+
+      [].tap do |connections|
+        [-1, 1].each do |col_offset|
+          jump_square = [jump_row, col + col_offset]
+          land_square = [land_row, col + 2 * col_offset]
+          connections << [jump_square, land_square] if valid_square?(land_square)
+        end
       end
     end
 

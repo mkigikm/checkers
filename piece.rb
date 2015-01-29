@@ -34,11 +34,40 @@ module Checkers
       false
     end
 
+    def valid_slides
+      directions.collect_concat do |dir|
+        @board.connections(square, dir).select do |square|
+          @board.empty?(square)
+        end
+      end
+    end
+
+    def valid_jumps(cur=square, prev=nil)
+      futures = []
+
+      directions.each do |dir|
+        board.jump_connections(cur, dir).each do |(jump_square, land_square)|
+          # don't want to go back the way we got here
+          next if land_square == prev
+          next unless can_jump_to?(jump_square, land_square, cur)
+
+          valid_jumps(land_square, cur).each do |future|
+            futures << [land_square] + future
+          end
+        end
+      end
+
+      if futures.empty?
+        [[]]
+      else
+        futures
+      end
+    end
+
     def perform_jump(land_square)
       jump_square = @board.jump_connection(square, land_square)
 
-      if jump_square && can_move_in?(board.connection(square, jump_square)) &&
-          board.empty?(land_square) && enemy_piece?(jump_square)
+      if jump_square && can_jump_to?(jump_square, land_square)
         board[square] = nil
         board[jump_square] = nil
         board[land_square] = self
@@ -98,9 +127,25 @@ module Checkers
                           (color == :black && direction == :down))
     end
 
+    def can_jump_to?(jump_square, land_square, start_square=square)
+      can_move_in?(board.connection(start_square, jump_square)) &&
+        board.empty?(land_square) &&
+        enemy_piece?(jump_square)
+    end
+
     def check_promote
       if rank == :pawn && board.in_king_row?(self)
         @rank = :king
+      end
+    end
+
+    def directions
+      if rank == :king
+        [:up, :down]
+      elsif color == :red
+        [:up]
+      else
+        [:down]
       end
     end
   end
