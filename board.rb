@@ -134,16 +134,8 @@ module Checkers
     def valid_move_seq?(start, moves)
       return false if self[start].nil?
       color = self[start].color
-      return valid_moves(color).include?([start, moves])
-      duped_board = dup
 
-      begin
-        duped_board[start].perform_moves!(moves)
-      rescue InvalidMoveError => e
-        return false
-      end
-
-      true
+      valid_moves(color).include?([start] + moves)
     end
 
     def perform_moves(start, moves)
@@ -239,7 +231,7 @@ module Checkers
       turn_pieces.each do |piece|
         piece.valid_jumps.each do |jump_sequence|
           unless jump_sequence.empty?
-            valid_moves << [piece.square, jump_sequence]
+            valid_moves << jump_sequence
           end
         end
       end
@@ -247,7 +239,7 @@ module Checkers
       if valid_moves.empty?
         turn_pieces.each do |piece|
           piece.valid_slides.each do |slide_square|
-            valid_moves << [piece.square, [slide_square]]
+            valid_moves << [piece.square, slide_square]
           end
         end
       end
