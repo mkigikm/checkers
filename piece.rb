@@ -42,23 +42,24 @@ module Checkers
       end
     end
 
-    def valid_jumps(cur=square, prev=nil)
+    def valid_jumps(cur=square, jumped_squares=[])
       futures = []
 
       directions.each do |dir|
         board.jump_connections(cur, dir).each do |(jump_square, land_square)|
-          # don't want to go back the way we got here
-          next if land_square == prev
+          # don't want to jump over the same piece twice
+          next if jumped_squares.include?(jump_square)
           next unless can_jump_to?(jump_square, land_square, cur)
 
-          valid_jumps(land_square, cur).each do |future|
-            futures << [land_square] + future
+          valid_jumps(land_square, jumped_squares + [jump_square]).
+              each do |future|
+            futures << [cur].concat(future)
           end
         end
       end
 
       if futures.empty?
-        [[]]
+        cur == square && jumped_squares.empty? ? [] : [[cur]]
       else
         futures
       end
@@ -129,7 +130,7 @@ module Checkers
 
     def can_jump_to?(jump_square, land_square, start_square=square)
       can_move_in?(board.connection(start_square, jump_square)) &&
-        board.empty?(land_square) &&
+        (board.empty?(land_square) || land_square == square) &&
         enemy_piece?(jump_square)
     end
 
