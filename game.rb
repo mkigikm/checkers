@@ -52,8 +52,8 @@ end
 if __FILE__ == $PROGRAM_NAME
   game = Checkers::Game.new
   human_player = Checkers::Human.new(true)
-  cpu_red = Checkers::Computer.new(:random, true)
-  cpu_black = Checkers::Computer.new(:random)
+  cpu_red = Checkers::Computer.new(:negamax, 6, true)
+  cpu_black = Checkers::Computer.new(:negamax, 1, true)
 
   game.play_game(cpu_red, cpu_black)
 end
