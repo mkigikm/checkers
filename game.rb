@@ -1,6 +1,7 @@
-require_relative 'board.rb'
-require_relative 'errors.rb'
-require_relative 'human_player.rb'
+require_relative 'board'
+require_relative 'errors'
+require_relative 'human_player'
+require_relative 'computer'
 
 module Checkers
   class Game
@@ -49,8 +50,10 @@ module Checkers
 end
 
 if __FILE__ == $PROGRAM_NAME
-  game = Checkers::Game.new()
-  human_player = Checkers::Human.new
+  game = Checkers::Game.new
+  human_player = Checkers::Human.new(true)
+  cpu_red = Checkers::Computer.new(:random, true)
+  cpu_black = Checkers::Computer.new(:random)
 
-  game.play_game(human_player, human_player)
+  game.play_game(cpu_red, cpu_black)
 end

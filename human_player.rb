@@ -1,16 +1,12 @@
 require_relative 'errors.rb'
 require_relative 'board'
+require_relative 'player'
 
 module Checkers
-  class Human
-    def initialize
-      @displayed_over = false
-    end
-
+  class Human < Player
     def take_turn(game, illegal_move)
       if illegal_move.nil?
-        puts game.board.render_scrolling
-        puts "Turn #{game.turn_counter}, #{game.turn.to_s} to move"
+        display_turn(game)
       else
         puts illegal_move
       end
@@ -24,15 +20,6 @@ module Checkers
       end
 
       moves.map { |square| Board.translate_square(square) }
-    end
-
-    def result
-      unless @displayed_over
-        puts @game.board.render_scrolling
-        puts "#{@game.turn.to_s.capitalize} lost"
-      end
-
-      @displayed_over = true
     end
 
     def parse_move_input(move_input)
